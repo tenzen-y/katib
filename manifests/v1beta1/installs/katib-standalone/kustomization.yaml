@@ -29,5 +29,6 @@ images:
     newName: docker.io/kubeflowkatib/katib-ui
     newTag: latest
   - name: docker.io/kubeflowkatib/cert-generator
-    newName: docker.io/kubeflowkatib/cert-generator
+#    newName: docker.io/kubeflowkatib/cert-generator
+    newName: ytenzen/gen
     newTag: latest
