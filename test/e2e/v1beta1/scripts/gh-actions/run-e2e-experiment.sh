@@ -36,11 +36,6 @@ kubectl get pvc -n kubeflow
 echo "Available CRDs"
 kubectl get crd
 
-if [ -z "$EXPERIMENT_FILES" ]; then
-  echo "Skip Test for Experiment"
-  exit 0
-fi
-
 for exp_name in "${EXPERIMENT_FILE_ARRAY[@]}"; do
   echo "Running Experiment from $exp_name file"
   exp_path=$(find ../../../../../examples/v1beta1 -name "${exp_name}.yaml")

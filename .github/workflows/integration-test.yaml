@@ -1,0 +1,172 @@
+name: Integration Test
+
+#on:
+#  - pull_request
+on:
+  - push
+
+env:
+  ARCHIVED_IMAGE_DIR: /tmp/images
+
+jobs:
+  build-core:
+    name: Build Core Images
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Build Component ${{ matrix.component-name }}
+        uses: ./.github/workflows/template-save-image
+        with:
+          image: docker.io/kubeflowkatib/${{ matrix.component-name }}
+          dockerfile: ${{ matrix.dockerfile }}
+          export-name: ${{ matrix.component-name }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - component-name: katib-controller
+            dockerfile: cmd/katib-controller/v1beta1/Dockerfile
+          - component-name: katib-db-manager
+            dockerfile: cmd/db-manager/v1beta1/Dockerfile
+          - component-name: katib-ui
+            dockerfile: cmd/new-ui/v1beta1/Dockerfile
+          - component-name: cert-generator
+            dockerfile: cmd/cert-generator/v1beta1/Dockerfile
+          - component-name: file-metrics-collector
+            dockerfile: cmd/metricscollector/v1beta1/file-metricscollector/Dockerfile
+          - component-name: tfevent-metrics-collector
+            dockerfile: cmd/metricscollector/v1beta1/tfevent-metricscollector/Dockerfile
+
+  build-algorithm:
+    name: Build Algorithm Images
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Build Component ${{ matrix.component-name }}
+        uses: ./.github/workflows/template-save-image
+        with:
+          image: docker.io/kubeflowkatib/${{ matrix.component-name }}
+          dockerfile: ${{ matrix.dockerfile }}
+          export-name: ${{ matrix.component-name }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - component-name: suggestion-hyperopt
+            dockerfile: cmd/suggestion/hyperopt/v1beta1/Dockerfile
+          - component-name: suggestion-chocolate
+            dockerfile: cmd/suggestion/chocolate/v1beta1/Dockerfile
+          - component-name: suggestion-hyperband
+            dockerfile: cmd/suggestion/hyperband/v1beta1/Dockerfile
+          - component-name: suggestion-skopt
+            dockerfile: cmd/suggestion/skopt/v1beta1/Dockerfile
+          - component-name: suggestion-goptuna
+            dockerfile: cmd/suggestion/goptuna/v1beta1/Dockerfile
+          - component-name: suggestion-optuna
+            dockerfile: cmd/suggestion/optuna/v1beta1/Dockerfile
+          - component-name: suggestion-enas
+            dockerfile: cmd/suggestion/nas/enas/v1beta1/Dockerfile
+          - component-name: suggestion-darts
+            dockerfile: cmd/suggestion/nas/darts/v1beta1/Dockerfile
+          - component-name: earlystopping-medianstop
+            dockerfile: cmd/earlystopping/medianstop/v1beta1/Dockerfile
+
+  build-trial:
+    name: Build Trial Images
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Build Trial ${{ matrix.trial-name }}
+        uses: ./.github/workflows/template-save-image
+        with:
+          image: docker.io/kubeflowkatib/${{ matrix.trial-name }}
+          dockerfile: ${{ matrix.dockerfile }}
+          export-name: ${{ matrix.trial-name }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - trial-name: mxnet-mnist
+            dockerfile: examples/v1beta1/trial-images/mxnet-mnist/Dockerfile
+          - trial-name: pytorch-mnist
+            dockerfile: examples/v1beta1/trial-images/pytorch-mnist/Dockerfile
+          - trial-name: tf-mnist-with-summaries
+            dockerfile: examples/v1beta1/trial-images/tf-mnist-with-summaries/Dockerfile
+          - trial-name: enas-cnn-cifar10-cpu
+            dockerfile: examples/v1beta1/trial-images/enas-cnn-cifar10/Dockerfile.cpu
+          - trial-name: darts-cnn-cifar10-cpu
+            dockerfile: examples/v1beta1/trial-images/darts-cnn-cifar10/Dockerfile.cpu
+
+  # We don't use images for GPU environments in E2E test,
+  # so we are only verifying that the following images can be built.
+  build-trial-with-gpus:
+    name: Build Trial with GPUs Images
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Build Trial ${{ matrix.trial-name }}
+        uses: ./.github/workflows/template-save-image
+        with:
+          image: docker.io/kubeflowkatib/${{ matrix.trial-name }}
+          dockerfile: ${{ matrix.dockerfile }}
+          export-name: ${{ matrix.trial-name }}
+          upload: false
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - trial-name: enas-cnn-cifar10-gpu
+            dockerfile: examples/v1beta1/trial-images/enas-cnn-cifar10/Dockerfile.gpu
+          - trial-name: darts-cnn-cifar10-gpu
+            dockerfile: examples/v1beta1/trial-images/darts-cnn-cifar10/Dockerfile.gpu
+
+  e2e:
+    name: Run E2E Test
+    runs-on: ubuntu-latest
+    needs: [build-core, build-algorithm, build-trial]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Run E2E Test with ${{ matrix.experiments }}
+        uses: ./.github/workflows/template-e2e-test
+        with:
+          kubernetes-version: ${{ matrix.kubernetes-version }}
+          experiments: ${{ matrix.experiments }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        # Detail: https://hub.docker.com/r/kindest/node
+        # TODO (tenzen-y): We need to consider running tests on more kubernetes versions.
+        # kubernetes-version: ["v1.20.15", "v1.21.12", "v1.22.9", "v1.23.6", "v1.24.1"]
+        kubernetes-version: ["v1.21.12", "v1.22.9", "v1.23.6"]
+        # Comma Delimited
+        experiments:
+          # enas-cnn-cifar10
+          - enas-cpu
+          # darts-cnn-cifar10
+          - darts-cpu
+          # tf-mnist-with-summaries
+          - tfjob-mnist-with-summaries
+          # pytorch-mnist
+          - file-metrics-collector,pytorchjob-mnist
+          - file-metrics-collector-with-json-format,median-stop-with-json-format
+          # mxnet-mnist
+          - random,tpe
+          - never-resume,hyperband
+          - median-stop,from-volume-resume
+          - grid,bayesian-optimization
+          - multivariate-tpe,cma-es

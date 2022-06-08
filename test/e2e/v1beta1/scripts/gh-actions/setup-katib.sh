@@ -20,8 +20,7 @@ set -o pipefail
 set -o nounset
 cd "$(dirname "$0")"
 
-DEPLOY_KATIB_UI=${1:-false}
-DEPLOY_TRAINING_OPERATOR=${2:-false}
+DEPLOY_TRAINING_OPERATOR=${1:-true}
 E2E_TEST_IMAGE_TAG="e2e-test"
 TRAINING_OPERATOR_VERSION="v1.4.0"
 
@@ -29,13 +28,6 @@ echo "Start to install Katib"
 
 # Update Katib images with `e2e-test`.
 cd ../../../../../ && make update-images OLD_PREFIX="docker.io/kubeflowkatib/" NEW_PREFIX="docker.io/kubeflowkatib/" TAG="$E2E_TEST_IMAGE_TAG" && cd -
-
-if ! "$DEPLOY_KATIB_UI"; then
-  index="$(yq eval '.resources.[] | select(. == "../../components/ui/") | path | .[-1]' ../../../../../manifests/v1beta1/installs/katib-standalone/kustomization.yaml)"
-  index="$index" yq eval -i 'del(.resources.[env(index)])' ../../../../../manifests/v1beta1/installs/katib-standalone/kustomization.yaml
-fi
-
-yq eval -i '.spec.resources.requests.storage|="2Gi"' ../../../../../manifests/v1beta1/components/mysql/pvc.yaml
 
 echo -e "\n The Katib will be deployed with the following configs"
 cat ../../../../../manifests/v1beta1/installs/katib-standalone/kustomization.yaml
