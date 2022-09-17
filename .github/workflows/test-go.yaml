@@ -1,73 +1,73 @@
-name: Go Test
-
-on:
-  - push
-  - pull_request
-
-jobs:
-  generatetests:
-    name: Generate And Format Test
-    runs-on: ubuntu-latest
-    env:
-      GOPATH: ${{ github.workspace }}/go
-    defaults:
-      run:
-        working-directory: ${{ env.GOPATH }}/src/github.com/kubeflow/katib
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v2
-        with:
-          path: ${{ env.GOPATH }}/src/github.com/kubeflow/katib
-
-      - name: Setup Go
-        uses: actions/setup-go@v3
-        with:
-          go-version-file: ${{ env.GOPATH }}/src/github.com/kubeflow/katib/go.mod
-
-      # Verify that go.mod and go.sum is synchronized
-      - name: Check Go modules
-        run: |
-          go mod tidy &&
-          git add go.* &&
-          git diff --cached --exit-code || (echo 'Please run "go mod tidy" to sync Go modules' && exit 1)
-
-      - name: Run Generate And Go Format Test
-        run: |
-          go mod download &&
-          make check &&
-          git add pkg/apis hack/gen-python-sdk &&
-          git diff --cached --exit-code || (echo 'Please run "make check" to generate codes and to format Go codes' && exit 1)
-
-  unittests:
-    name: Unit Test
-    runs-on: ubuntu-latest
-    env:
-      GOPATH: ${{ github.workspace }}/go
-    defaults:
-      run:
-        working-directory: ${{ env.GOPATH }}/src/github.com/kubeflow/katib
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v2
-        with:
-          path: ${{ env.GOPATH }}/src/github.com/kubeflow/katib
-
-      - name: Setup Go
-        uses: actions/setup-go@v3
-        with:
-          go-version-file: ${{ env.GOPATH }}/src/github.com/kubeflow/katib/go.mod
-
-      - name: Run Go test
-        run: go mod download && make test ENVTEST_K8S_VERSION=${{ matrix.kubernetes-version }}
-
-      - name: Coveralls report
-        uses: shogo82148/actions-goveralls@v1
-        with:
-          path-to-profile: coverage.out
-          working-directory: ${{ env.GOPATH }}/src/github.com/kubeflow/katib
-
-    strategy:
-      fail-fast: false
-      matrix:
-        # Detail: `setup-envtest list --arch amd64`
-        kubernetes-version: ["1.22.1", "1.23.5", "1.24.2"]
+#name: Go Test
+#
+#on:
+#  - push
+#  - pull_request
+#
+#jobs:
+#  generatetests:
+#    name: Generate And Format Test
+#    runs-on: ubuntu-latest
+#    env:
+#      GOPATH: ${{ github.workspace }}/go
+#    defaults:
+#      run:
+#        working-directory: ${{ env.GOPATH }}/src/github.com/kubeflow/katib
+#    steps:
+#      - name: Check out code
+#        uses: actions/checkout@v2
+#        with:
+#          path: ${{ env.GOPATH }}/src/github.com/kubeflow/katib
+#
+#      - name: Setup Go
+#        uses: actions/setup-go@v3
+#        with:
+#          go-version-file: ${{ env.GOPATH }}/src/github.com/kubeflow/katib/go.mod
+#
+#      # Verify that go.mod and go.sum is synchronized
+#      - name: Check Go modules
+#        run: |
+#          go mod tidy &&
+#          git add go.* &&
+#          git diff --cached --exit-code || (echo 'Please run "go mod tidy" to sync Go modules' && exit 1)
+#
+#      - name: Run Generate And Go Format Test
+#        run: |
+#          go mod download &&
+#          make check &&
+#          git add pkg/apis hack/gen-python-sdk &&
+#          git diff --cached --exit-code || (echo 'Please run "make check" to generate codes and to format Go codes' && exit 1)
+#
+#  unittests:
+#    name: Unit Test
+#    runs-on: ubuntu-latest
+#    env:
+#      GOPATH: ${{ github.workspace }}/go
+#    defaults:
+#      run:
+#        working-directory: ${{ env.GOPATH }}/src/github.com/kubeflow/katib
+#    steps:
+#      - name: Check out code
+#        uses: actions/checkout@v2
+#        with:
+#          path: ${{ env.GOPATH }}/src/github.com/kubeflow/katib
+#
+#      - name: Setup Go
+#        uses: actions/setup-go@v3
+#        with:
+#          go-version-file: ${{ env.GOPATH }}/src/github.com/kubeflow/katib/go.mod
+#
+#      - name: Run Go test
+#        run: go mod download && make test ENVTEST_K8S_VERSION=${{ matrix.kubernetes-version }}
+#
+#      - name: Coveralls report
+#        uses: shogo82148/actions-goveralls@v1
+#        with:
+#          path-to-profile: coverage.out
+#          working-directory: ${{ env.GOPATH }}/src/github.com/kubeflow/katib
+#
+#    strategy:
+#      fail-fast: false
+#      matrix:
+#        # Detail: `setup-envtest list --arch amd64`
+#        kubernetes-version: ["1.22.1", "1.23.5", "1.24.2"]
