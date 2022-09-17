@@ -2,46 +2,18 @@ name: Publish AutoML Algorithm Images
 
 on:
   push:
-#    branches:
-#      - 'master'
-#      - 'release-.*'
-#    tags:
-#      - 'v.*'
   pull_request:
     branches:
       - 'master'
       - 'release-.*'
 
-env:
-  DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-  DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-
 jobs:
   algorithm:
     name: Publish Image
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Publish Component ${{ matrix.component-name }}
-        if: >-
-          github.repository == 'kubeflow/katib' &&
-          (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/release-') || startsWith(github.ref, 'refs/tags/v'))
-        id: publish-component
-        uses: ./.github/workflows/template-publish-image
-        with:
-          image: docker.io/kubeflowkatib/${{ matrix.component-name }}
-          dockerfile: ${{ matrix.dockerfile }}
-          push: true
-
-      - name: Build Component ${{ matrix.component-name }}
-        if: steps.publish-component.outcome == 'skipped'
-        uses: ./.github/workflows/template-publish-image
-        with:
-          image: docker.io/kubeflowkatib/${{ matrix.component-name }}
-          dockerfile: ${{ matrix.dockerfile }}
-          push: false
+    uses: ./.github/workflows/build-and-publish-images.yaml
+    with:
+      component-name: ${{ matrix.component-name }}
+      dockerfile: ${{ matrix.dockerfile }}
 
     strategy:
       fail-fast: false
