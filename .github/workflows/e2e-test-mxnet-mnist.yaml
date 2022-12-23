@@ -35,10 +35,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        kubernetes-version: ["v1.23.13", "v1.24.7", "v1.25.3"]
+        kubernetes-version: ["v1.23.13"]
         # Comma Delimited
         experiments:
-          # suggestion-hyperopt
-          - "never-resume,from-volume-resume,median-stop"
           # others
-          - "grid,bayesian-optimization,tpe,multivariate-tpe,cma-es,hyperband"
+          - "bayesian-optimization"

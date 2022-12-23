@@ -44,7 +44,8 @@ fi
 for exp_name in "${EXPERIMENT_FILE_ARRAY[@]}"; do
   echo "Running Experiment from $exp_name file"
   exp_path=$(find ../../../../../examples/v1beta1 -name "${exp_name}.yaml")
-  ../../bin/run-e2e-experiment "$exp_path" || (kubectl get pods -n kubeflow && exit 1)
+  ../../bin/run-e2e-experiment "$exp_path" || \
+   (kubectl get pods -n kubeflow; kubectl describe pods -n kubeflow; kubectl -n kubeflow logs -l katib.kubeflow.org/component=controller; kubectl describe experiment -n kubeflow; exit 1)
 done
 
 exit 0
