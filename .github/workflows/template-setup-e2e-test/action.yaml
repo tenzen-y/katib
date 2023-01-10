@@ -10,6 +10,10 @@ inputs:
 runs:
   using: composite
   steps:
+#    - name: Update
+#      shell: bash
+#      run: sudo apt-get update -y
+
     - name: Set Up Minikube Cluster
       uses: manusa/actions-setup-minikube@v2.7.2
       with:

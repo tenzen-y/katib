@@ -25,16 +25,9 @@ jobs:
         with:
           kubernetes-version: ${{ matrix.kubernetes-version }}
 
-      - name: Run e2e test with ${{ matrix.experiments }} experiments
-        uses: ./.github/workflows/template-e2e-test
-        with:
-          experiments: ${{ matrix.experiments }}
-          # Comma Delimited
-          trial-images: enas-cnn-cifar10-cpu
-
     strategy:
       fail-fast: false
       matrix:
-        kubernetes-version: ["v1.23.13", "v1.24.7", "v1.25.3"]
+        kubernetes-version: ["v1.23.0", "v1.23.1", "v1.23.2", "v1.23.3", "v1.23.4", "v1.23.5", "v1.23.6", "v1.23.7", "v1.23.8", "v1.23.9", "v1.24.0", "v1.24.1", "v1.24.2", "v1.24.3", "v1.24.4", "v1.24.5", "v1.24.6", "v1.24.7", "v1.24.8", "1.25.0", "1.25.1", "1.25.2"]
         # Comma Delimited
         experiments: ["enas-cpu"]
