@@ -48,7 +48,9 @@ _build_containers() {
   done
 
   echo -e "\nBuilding $CONTAINER_NAME image with $DOCKERFILE...\n"
-  docker buildx build --platform "$(uname -m)" --load -t "$REGISTRY/$CONTAINER_NAME:$TAG" -f "../../../../../$DOCKERFILE" ../../../../../
+
+  minikube image build --build-opt platform="$(uname -m)" -t "$REGISTRY/$CONTAINER_NAME:$TAG" -f "../../../../../$DOCKERFILE" ../../../../../
+#  docker buildx build --platform "$(uname -m)" --load -t "$REGISTRY/$CONTAINER_NAME:$TAG" -f "../../../../../$DOCKERFILE" ../../../../../
 }
 
 _load_minikube_cluster() {
@@ -68,7 +70,7 @@ _install_tools() {
 
 cleanup_build_cache() {
   echo -e "\nCleanup Build Cache...\n"
-  docker builder prune
+  docker buildx prune -f
 }
 
 run() {
@@ -99,7 +101,7 @@ run() {
     for s in "${suggestions[@]}"; do
       if [ "$s" == "$CONTAINER_NAME" ]; then
         _build_containers "$CONTAINER_NAME" "$DOCKERFILE"
-        _load_minikube_cluster "$CONTAINER_NAME"
+#        _load_minikube_cluster "$CONTAINER_NAME"
         break
       fi
     done
