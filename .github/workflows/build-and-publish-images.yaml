@@ -37,18 +37,6 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Hack
-        shell: bash
-        run: |
-          df -h
-          sudo swapoff -a
-          sudo rm -f /swapfile
-          sudo apt-get clean
-          sudo rm -rf /usr/share/dotnet
-          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
-          docker rmi $(docker image ls -aq)
-          df -h
-
       - name: Publish Component ${{ inputs.component-name }}
         # Trigger workflow only for kubeflow/katib repository with specific branch (master, release-.*) or tag (v.*).
         if: >-
