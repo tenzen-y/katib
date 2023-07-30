@@ -8,7 +8,8 @@ from kubeflow.katib.utils.utils import FakeResponse
 from kubeflow.katib.constants import constants
 
 # Experiment timeout is 40 min.
-EXPERIMENT_TIMEOUT = 60 * 40
+# EXPERIMENT_TIMEOUT = 60 * 40
+EXPERIMENT_TIMEOUT = 60 * 5
 
 # The default logging config.
 logging.basicConfig(level=logging.INFO)

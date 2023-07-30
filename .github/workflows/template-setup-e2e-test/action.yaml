@@ -31,18 +31,20 @@ runs:
         echo "Disk usage after cleanup:"
         df -h
 
-    - name: Setup Minikube Cluster
-      uses: medyagh/setup-minikube@v0.0.13
-      with:
-        driver: none
-        kubernetes-version: ${{ inputs.kubernetes-version }}
-        minikube-version: 1.31.1
-        start-args: --wait-timeout=120s
-
     - name: Setup kubectl
       uses: azure/setup-kubectl@v3
       with:
         version: ${{ inputs.kubernetes-version }}
+
+    - name: Setup Minikube Cluster
+      uses: medyagh/setup-minikube@v0.0.14
+      with:
+        network-plugin: cni
+        cni: flannel
+        driver: none
+        kubernetes-version: ${{ inputs.kubernetes-version }}
+        minikube-version: 1.31.1
+        start-args: --wait-timeout=120s
 
     - name: Setup Docker Buildx
       uses: docker/setup-buildx-action@v2

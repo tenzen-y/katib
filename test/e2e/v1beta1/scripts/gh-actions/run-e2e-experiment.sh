@@ -45,7 +45,7 @@ for exp_name in "${EXPERIMENT_FILE_ARRAY[@]}"; do
   echo "Running Experiment from $exp_name file"
   exp_path=$(find ../../../../../examples/v1beta1 -name "${exp_name}.yaml")
   python run-e2e-experiment.py --experiment-path "${exp_path}" --namespace default \
-  --verbose || (kubectl get pods -n kubeflow && exit 1)
+  --verbose || (kubectl get pods -n kubeflow && kubectl describe pods -n kubeflow && kubectl logs deployments/katib-db-manager -n kubeflow && exit 1)
 done
 
 exit 0
