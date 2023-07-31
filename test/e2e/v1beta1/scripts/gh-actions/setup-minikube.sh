@@ -21,9 +21,9 @@ set -o pipefail
 set -o nounset
 cd "$(dirname "$0")"
 
-DEPLOY_KATIB_UI=${1:-false}
-TRIAL_IMAGES=${2:-""}
-EXPERIMENTS=${3:-""}
+#DEPLOY_KATIB_UI=${1:-false}
+#TRIAL_IMAGES=${2:-""}
+#EXPERIMENTS=${3:-""}
 
 echo "Start to setup Minikube Kubernetes Cluster"
 kubectl version
@@ -31,4 +31,4 @@ kubectl cluster-info
 kubectl get nodes
 
 echo "Build and Load container images"
-./build-load.sh "$TRIAL_IMAGES" "$EXPERIMENTS" "$DEPLOY_KATIB_UI"
+#./build-load.sh "$TRIAL_IMAGES" "$EXPERIMENTS" "$DEPLOY_KATIB_UI"

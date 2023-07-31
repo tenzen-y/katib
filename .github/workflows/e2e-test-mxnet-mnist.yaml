@@ -1,9 +1,7 @@
 name: E2E Test with mxnet-mnist
 
 on:
-  pull_request:
-    paths-ignore:
-      - "pkg/ui/v1beta1/frontend/**"
+  push:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -36,7 +34,5 @@ jobs:
         kubernetes-version: ["v1.23.17", "v1.24.16", "v1.25.12"]
         # Comma Delimited
         experiments:
-          # suggestion-hyperopt
-          - "long-running-resume,from-volume-resume,median-stop"
           # others
-          - "grid,bayesian-optimization,tpe,multivariate-tpe,cma-es,hyperband"
+          - "grid"
