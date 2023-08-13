@@ -29,6 +29,7 @@ import rfc3339
 import api_pb2
 from logging import getLogger, StreamHandler, INFO
 from pkg.metricscollector.v1beta1.common import const
+from tensorboard.backend.event_processing import tag_types
 
 
 class TFEventFileParser:
@@ -43,9 +44,10 @@ class TFEventFileParser:
 
     def parse_summary(self, tfefile):
         metric_logs = []
-        event_accumulator = EventAccumulator(tfefile, size_guidance={'tensors': 0})
+        event_accumulator = EventAccumulator(tfefile, size_guidance={tag_types.TENSORS: 0})
+
         event_accumulator.Reload()
-        for tag in event_accumulator.Tags()['tensors']:
+        for tag in event_accumulator.Tags()[tag_types.TENSORS]:
             for m in self.metric_names:
 
                 tfefile_parent_dir = os.path.dirname(m) if len(m.split("/")) >= 2 else os.path.dirname(tfefile)
@@ -53,6 +55,7 @@ class TFEventFileParser:
                 if not tag.startswith(m.split("/")[-1]) or not basedir_name.endswith(tfefile_parent_dir):
                     continue
 
+                print("\n\n\nevent_accumulator.Tensors(tag): {}\n\n\n".format(str(event_accumulator.Tensors(tag))))
                 for wall_time, step, tensor in event_accumulator.Tensors(tag):
                     ml = api_pb2.MetricLog(
                         time_stamp=rfc3339.rfc3339(datetime.fromtimestamp(wall_time)),

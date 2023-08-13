@@ -1,9 +1,7 @@
 name: Python Test
 
 on:
-  pull_request:
-    paths-ignore:
-      - "pkg/ui/v1beta1/frontend/**"
+  push:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -21,7 +19,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
-          python-version: 3.9
+          python-version: '3.10'
 
       - name: Run Python test
         run: make pytest

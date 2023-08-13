@@ -169,6 +169,8 @@ prepare-pytest:
 prepare-pytest-testdata:
 ifeq ("$(wildcard $(TEST_TENSORFLOW_EVENT_FILE_PATH))", "")
 	python examples/v1beta1/trial-images/tf-mnist-with-summaries/mnist.py --epochs 5 --batch-size 200 --log-path $(TEST_TENSORFLOW_EVENT_FILE_PATH)
+	tensorboard --logdir $(TEST_TENSORFLOW_EVENT_FILE_PATH)/train --inspect
+	tensorboard --logdir $(TEST_TENSORFLOW_EVENT_FILE_PATH)/test --inspect
 endif
 
 pytest: prepare-pytest prepare-pytest-testdata

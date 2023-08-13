@@ -26,6 +26,7 @@ class TestTFEventMetricsCollector(unittest.TestCase):
         # Metric format is "{{dirname}}/{{metrics name}}"
         metric_names = ["train/accuracy", "train/loss", "test/loss", "test/accuracy"]
         metric_logs = utils.get_metric_logs(logs_dir, metric_names)
+        print("\n\n\n\nmetric_logs: {}\n\n\n\n".format(str(metric_logs)))
         self.assertEqual(20, len(metric_logs))
 
         for log in metric_logs:
